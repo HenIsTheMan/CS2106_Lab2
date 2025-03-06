@@ -1,0 +1,21 @@
+autograder
+comp.sh
+file.txt
+func.sh
+greet_from_future.sh
+hello.sh
+ls.out
+product.sh
+slow.c
+talk.c
+total 40
+drwxr-xr-x 4 srhd srhd 4096 Mar  5 02:53 autograder
+-rwxr-xr-x 1 srhd srhd  242 Mar  5 04:10 comp.sh
+-rw-r--r-- 1 srhd srhd   80 Mar  3 19:02 file.txt
+-rwxr-xr-x 1 srhd srhd  215 Mar  5 04:20 func.sh
+-rwxr-xr-x 1 srhd srhd  259 Mar  5 04:05 greet_from_future.sh
+-rwxr-xr-x 1 srhd srhd   74 Mar  5 03:15 hello.sh
+-rw-r--r-- 1 srhd srhd   98 Mar  6 06:31 ls.out
+-rwxr-xr-x 1 srhd srhd   53 Mar  5 03:20 product.sh
+-rw-r--r-- 1 srhd srhd  519 Mar  3 19:02 slow.c
+-rw-r--r-- 1 srhd srhd  257 Mar  3 19:02 talk.c
