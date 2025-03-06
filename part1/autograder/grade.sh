@@ -1,51 +1,47 @@
 #!/bin/bash
 
-# [1] Check if we have enough and the right arguments
-if [[ $# -ne 3 ]]; then # [1] Ensuring we have exactly 3 args
+## I changed up the steps as I felt this way is clearer and perhaps more efficient
+
+# [1 - 5] Input Validation
+if [[ $# -ne 3 ]]; then # [1] Ensuring exactly 3 args
     echo "Usage: ./grade.sh <filename> <number_of_tests> <query_point>"
     exit 1
 fi
 
-if [[ $2 -le 0 ]]; then # [2] Ensuring number_of_tests is valid (not sure why the brief said "less than")
+numberOfTests=$2
+
+if [[ $numberOfTests -le 0 ]]; then # [2] Ensuring $numberOfTests is valid
     echo "number_of_tests must be larger than 0"
     exit 1
 fi
 
-if [[ $3 -lt 0 ]]; then # [3] Ensuring query_point is valid
+queryPt=$3
+
+if [[ $queryPt -lt 0 ]]; then # [3] Ensuring $queryPt is valid
     echo "query_point must be larger than or equal 0"
     exit 1
 fi
 
-if [[ $3 -gt $2 ]]; then # [4] Ensuring query_point <= number_of_tests
+if [[ $queryPt -gt $numberOfTests ]]; then # [4] Ensuring $queryPt <= $numberOfTests
     echo "query_point must be less than or equal to the number_of_tests"
     exit 1
 fi
 
-# [5] Making number_of_tests <= number of test cases available (I feel like this is the better sln but need to delete temp files)
-# if [[ $2 -gt $(ls ref/*.in | wc -l) ]]; then
-    # set $1 $(ls ref/*.in | wc -l) $3
-    
-    ## Debugging (can remove)
-    ## echo $1
-    ## echo $2
-    ## echo $3
-# fi
+testCaseCount=$(ls ref/*.in | wc -l)
 
-# [5] Making number_of_tests <= number of test cases available
-ls ref/*.in > myTempFile
-count=$(wc -l < myTempFile)
-
-if [[ $2 -gt $count ]]; then
-    set $1 $count $3
+if [[ $numberOfTests -gt $testCaseCount ]]; then # [5] Ensuring $numberOfTests <= number of test cases available
+    let numberOfTests=$testCaseCount
 fi
 
-# [5] Delete temporary files
-rm myTempFile
+# [6] Ref Prog
+refProgName=$1
 
-# [6] Compile the reference program
-gcc $(ls ref/*.c) -o fun
+gcc $(ls ref/*.c) -o $refProgName # [6] Compilation of Ref Prog
 
-# Generate reference output files
+# [7] Deletion of Old Output Ref Files (if any)
+rm -f ref/*.out
+
+# [8] Generation of New Output Ref Files
 
 # Now mark submissions
 
