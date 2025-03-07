@@ -30,27 +30,26 @@ int main() {
         return 1;
     }
 
-    if(forkResult > 0){ //Parent process (does talk as can wait)
+    ///"./" refers to the curr directory
+    if(forkResult > 0){ //Parent process (does talk as can wait, ./talk < results.out > results.out [(a < b) > c, > instead of >> so overwrite instead of append])
         wait(NULL); //WAIT, THEY DON'T LOVE U LIKE I LOVE U
 
-        int intermediateFd = open("./temp.txt", O_RDONLY);
-        int writeFd = open("./results.out", O_CREAT | O_WRONLY);
+        int myFd = open("./results.out", O_RDWR); //O_RDWR flag for read and write
 
-        //execlp("./talk", "talk", NULL);
+        dup2(myFd, STDIN_FILENO);
+        dup2(myFd, STDOUT_FILENO);
 
-        close(intermediateFd);
+        execlp("./talk", "talk", NULL);
 
+        close(myFd);
+    } else{ //Child process (does slow as cannot wait, ./slow 5 > results.out)
+        int myFd = open("./results.out", O_CREAT | O_WRONLY); //O_CREAT flag to create file if it does not alr exist
 
-    } else{ //Child process (does slow as cannot wait)
-        //"./" refers to the curr directory
-        //O_CREAT flag to create file if it does not alr exist
-        int intermediateFd = open("./temp.txt", O_CREAT | O_WRONLY);
-
-        dup2(intermediateFd, STDOUT_FILENO);
+        dup2(myFd, STDOUT_FILENO);
 
         execlp("./slow", "slow", "5", NULL);
 
-        close(intermediateFd);
+        close(myFd);
     }
 }
 
