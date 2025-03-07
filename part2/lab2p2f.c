@@ -5,6 +5,7 @@
 #include <fcntl.h>
 
 int main() {
+
     printf("Be patient, the program will take around 7 seconds to run.\n");
     printf("At the end you can do \"cat results.out\" to see the result.\n");
 
@@ -15,82 +16,85 @@ int main() {
     // WITHOUT using | and > from the shell.
     //
 
-    int pipeFdArr[2]; //0 for reading end, 1 for writing end
+    //* Vals can be swapped easily due to indirect indexing (using vars or macros instead of literals to index)
+    const int readingEnd = 0;
+    const int writingEnd = 1;
+    //*/
+
+    int pipeFdArr[2];
 
     if(pipe(pipeFdArr) == -1){ //If pipe fails...
         perror("\nPipe Failed!");
 
         puts("");
 
-        return 1;
+        return EXIT_FAILURE;
     }
-    
-    int forkResult = fork();
 
-    if(forkResult == -1){ //If fork fails...
+    int childPid = fork();
+
+    if(childPid == -1){ //If fork fails...
         perror("\nFork Failed!");
 
         puts("");
 
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    ///"./" refers to the curr directory
-    if(forkResult > 0){ //Parent process
-        close(pipeFdArr[0]); //Close reading end
+    if(childPid > 0){ //If parent process...
+        close(pipeFdArr[writingEnd]); //Close for parent process only
 
-        dup2(pipeFdArr[1], STDOUT_FILENO); //Output now goes to writing end instead of stdout
+        dup2(pipeFdArr[readingEnd], STDIN_FILENO); //Input now comes from reading end instead of stdin
 
-        execlp("./slow", "slow", "5", NULL);
+        //Can call right after dup2 as closing original instead of duplicate
+        close(pipeFdArr[readingEnd]); //Close for parent process only
 
-        //* If execlp fails... (only runs if so)
-        perror("\nExeclp Failed!");
-
-        puts("");
-
-        return 1;
-        //*/
-
-
-
-
-
-
-
-
-        int status;
-
-        printf("here");
-
-        if(wait(&status) == -1){ //WAIT, THEY DON'T LOVE U LIKE I LOVE U
-            close(myFd);
-
+        if(wait(NULL) == -1){ //If wait fails...
             perror("\nWait Failed!");
 
             puts("");
 
-            return 1;
+            return EXIT_FAILURE;
         }
 
-        printf("here1");
+        //Putting "./results.out" instead leads to outputFd == -1 on 2nd run (not sure why)
+        //O_CREAT flag to create file if it does not alr exist
+        //O_TRUNC flag to clear file contents if file exists
+        //Last 4 digits (<prefix for oct><perms for Owner/User><perms for Group><perms for Others>)
+        //Perms: 100 (4, Read) | 010 (2, Write) | 001 (1, Execute) | 000 (0, None)
+        int outputFd = open("results.out", O_CREAT | O_TRUNC | O_WRONLY, 0777);
 
-        close(myFd); //Must be after wait as child uses myFd, must be before status check as still need to close myFd if child's execlp failed
+        if(outputFd == -1){ //If open fails...
+            perror("\nOpen Failed!");
 
-        if(status == 1){ //If child's execlp failed... (printing alr done by child)
-            return 1;
+            puts("");
+
+            return EXIT_FAILURE;
         }
 
-        printf("here2");
+        dup2(outputFd, STDOUT_FILENO); //Output now goes to outputFd instead of stdout
 
-        //myFd = open("./results.out", O_RDWR); //??
+        //Can call right after dup2 as closing original instead of duplicate
+        close(outputFd);
 
-        //dup2(myFd, STDIN_FILENO);
-        //dup2(myFd, STDOUT_FILENO);
+        execlp("./talk", "talk", NULL);
+    } else{ //If child process...
+        close(pipeFdArr[readingEnd]); //Close for child process only
 
-        //execlp("./talk", "talk", NULL);
+        dup2(pipeFdArr[writingEnd], STDOUT_FILENO); //Output now goes to writing end instead of stdout
 
-        //??
-    } else{ //Child process
+        //Can call right after dup2 as closing original instead of duplicate
+        close(pipeFdArr[writingEnd]); //Close for child process only
+
+        execlp("./slow", "slow", "5", NULL);
     }
+
+    //* If execlp fails... (only runs if so)
+    perror("\nExeclp Failed!");
+
+    puts("");
+
+    return EXIT_FAILURE;
+    //*/
 }
 
