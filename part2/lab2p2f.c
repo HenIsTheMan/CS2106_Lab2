@@ -20,19 +20,37 @@ int main() {
 
     if(pipe(pipeFdArr) < 0){
         perror("lab2p2f: ");
+        return 1;
     }
-
-    const int forkResult = fork();
+    
+    int forkResult = fork();
 
     if(forkResult < 0){
         printf("lab2p2f: Fork Failed!\n");
         return 1;
     }
 
-    if(forkResult > 0){ //Parent process
+    if(forkResult > 0){ //Parent process (does talk as can wait)
+        wait(NULL); //WAIT, THEY DON'T LOVE U LIKE I LOVE U
+
+        int intermediateFd = open("./temp.txt", O_RDONLY);
+        int writeFd = open("./results.out", O_CREAT | O_WRONLY);
+
         //execlp("./talk", "talk", NULL);
-    } else{ //Child process
-        //execlp("./slow", "slow", "5", NULL);
+
+        close(intermediateFd);
+
+
+    } else{ //Child process (does slow as cannot wait)
+        //"./" refers to the curr directory
+        //O_CREAT flag to create file if it does not alr exist
+        int intermediateFd = open("./temp.txt", O_CREAT | O_WRONLY);
+
+        dup2(intermediateFd, STDOUT_FILENO);
+
+        execlp("./slow", "slow", "5", NULL);
+
+        close(intermediateFd);
     }
 }
 
