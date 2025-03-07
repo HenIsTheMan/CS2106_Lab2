@@ -3,8 +3,9 @@
 #include <sys/wait.h>
 
 int main() {
-    if(fork() ==  0) {
-        execlp("cat", "cat", "file.txt", NULL);
+    if(fork() == 0) {
+        char* const argv[] = {"cat", "file.txt", NULL};
+        execvp("cat", argv);
     }
     else
         wait(NULL);
