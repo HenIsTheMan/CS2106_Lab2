@@ -44,7 +44,7 @@ int main() {
     if(childPid > 0){ //If parent process...
         close(pipeFdArr[writingEnd]); //Close for parent process only
 
-        dup2(pipeFdArr[readingEnd], STDIN_FILENO); //Input now comes from reading end instead of stdin
+        dup2(pipeFdArr[readingEnd], STDIN_FILENO); //Input now comes from duplicate fd of reading end instead of stdin
 
         //Can call right after dup2 as closing original instead of duplicate
         close(pipeFdArr[readingEnd]); //Close for parent process only
@@ -72,7 +72,7 @@ int main() {
             return EXIT_FAILURE;
         }
 
-        dup2(outputFd, STDOUT_FILENO); //Output now goes to outputFd instead of stdout
+        dup2(outputFd, STDOUT_FILENO); //Output now goes to duplicate outputFd instead of stdout
 
         //Can call right after dup2 as closing original instead of duplicate
         close(outputFd);
@@ -81,7 +81,7 @@ int main() {
     } else{ //If child process...
         close(pipeFdArr[readingEnd]); //Close for child process only
 
-        dup2(pipeFdArr[writingEnd], STDOUT_FILENO); //Output now goes to writing end instead of stdout
+        dup2(pipeFdArr[writingEnd], STDOUT_FILENO); //Output now goes to duplicate fd of writing end instead of stdout
 
         //Can call right after dup2 as closing original instead of duplicate
         close(pipeFdArr[writingEnd]); //Close for child process only
